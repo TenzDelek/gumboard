@@ -307,12 +307,14 @@ export default function PublicBoardPage({ params }: { params: Promise<{ id: stri
       if (boardResponse.ok) {
         const { board } = await boardResponse.json();
         setBoard(board);
-      }
 
-      const notesResponse = await fetch(`/api/boards/${boardId}/notes`);
-      if (notesResponse.ok) {
-        const { notes } = await notesResponse.json();
-        setNotes(notes);
+        if (board.isPublic) {
+          const notesResponse = await fetch(`/api/boards/${boardId}/notes`);
+          if (notesResponse.ok) {
+            const { notes } = await notesResponse.json();
+            setNotes(notes);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching board data:", error);
@@ -366,6 +368,27 @@ export default function PublicBoardPage({ params }: { params: Promise<{ id: stri
     );
   }
 
+  if (board && !board.isPublic) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background dark:bg-zinc-950 text-zinc-100">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2">Private Board</h1>
+          <p className="text-muted-foreground mb-4">
+            This board is private and not accessible to the public.
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Please sign in if you have access to this board.
+          </p>
+
+          <div className="space-x-2">
+            <Button variant="outline" asChild>
+              <Link href="/">Go to Gumboard</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen max-w-screen bg-background dark:bg-zinc-950">
       <div className="bg-card dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm">

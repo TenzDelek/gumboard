@@ -16,19 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: "Board not found" }, { status: 404 });
     }
 
-    if (board.isPublic) {
-      const { organization, ...boardData } = board;
-      return NextResponse.json({
-        board: {
-          ...boardData,
-          organization: {
-            id: organization.id,
-            name: organization.name,
-          },
-        },
-      });
-    }
-
+    if (!board.isPublic) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -43,6 +31,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     if (!userInOrg) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
     }
 
     // Return board data without sensitive organization member details
