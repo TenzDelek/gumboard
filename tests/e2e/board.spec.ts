@@ -123,5 +123,28 @@ test.describe("Board Management", () => {
       // Should navigate to the home page
       await expect(page).toHaveURL("/");
     });
+
+    test("should show not found page for private public board", async ({
+      page,
+      testPrisma,
+      testContext,
+    }) => {
+      const privateBoard = await testPrisma.board.create({
+        data: {
+          name: "Private Test Board",
+          isPublic: false,
+          organizationId: testContext.organizationId,
+          createdBy: testContext.userId,
+        },
+      });
+
+      await page.goto(`/public/boards/${privateBoard.id}`);
+
+      await expect(page.locator("text=Board not found")).toBeVisible();
+      await expect(
+        page.locator("text=This board doesn't exist or is not publicly accessible.")
+      ).toBeVisible();
+      await expect(page.getByRole("link", { name: "Go to Gumboard" })).toBeVisible();
+    });
   });
 });
